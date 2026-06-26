@@ -2,8 +2,6 @@ import { Request, Response } from 'express';
 import { searchTeams } from '../match/apiFootball.service';
 import { asyncHandler } from '../utils/asyncHandler';
 
-// SCRUM-14: buscar equipos
-// GET /api/teams/search?name=river
 export const searchTeamsHandler = asyncHandler(async (req: Request, res: Response) => {
   const { name } = req.query as { name?: string };
 

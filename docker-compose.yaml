@@ -1,9 +1,0 @@
-# Puerto del servidor
-PORT=3000
-
-# MongoDB
-MONGO_URI=mongodb://root:example@localhost:27017/football?authSource=admin
-
-# API Football (registrarse gratis en https://dashboard.api-football.com)
-API_FOOTBALL_KEY=TU_API_KEY_AQUI
-API_FOOTBALL_URL=https://v3.football.api-sports.io

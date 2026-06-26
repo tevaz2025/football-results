@@ -1,5 +1,5 @@
 # Football-Results
-trabajo para desarrollo de software 
+Trabajo para Desarrollo de Software 
 UTN-FRVT
 Autores: Tomas Vazquez, Valentin Favoretto, Jeronimo Lezcano
 

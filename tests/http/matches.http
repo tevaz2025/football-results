@@ -1,0 +1,133 @@
+### Variables
+@baseUrl = http://localhost:3000
+
+### ── Health ──────────────────────────────────────────────────────────────────
+GET {{baseUrl}}/health
+
+### ════════════════════════════════════════════════════════════════════════════
+### COMPETICIONES PERMITIDAS (whitelist exclusiva — ver src/utils/leagueWhitelist.ts)
+### 39=Premier League · 140=La Liga · 135=Serie A · 78=Bundesliga · 61=Ligue 1
+### 128=Liga Profesional Argentina · 71=Brasileirão Série A · 1=Mundial 2026
+### Cualquier otra liga, copa o amistoso queda filtrado automáticamente.
+### ════════════════════════════════════════════════════════════════════════════
+
+### ════════════════════════════════════════════════════════════════════════════
+### SPRINT 1 — Ver y navegar partidos
+### ════════════════════════════════════════════════════════════════════════════
+
+### SCRUM-5: Partidos de HOY (datos vienen solos de API-Football, ya filtrados)
+GET {{baseUrl}}/api/matches/today
+
+### SCRUM-5: Partidos de hoy solo de Argentina
+GET {{baseUrl}}/api/matches/today?country=Argentina
+
+### SCRUM-5: Partidos de hoy en vivo
+GET {{baseUrl}}/api/matches/today?status=live
+
+### SCRUM-7: Partidos por fecha (hasta 2 meses atrás) — reemplazá la fecha por una reciente
+GET {{baseUrl}}/api/matches?date=2026-06-20
+
+### SCRUM-7: Partidos históricos con filtro de país
+GET {{baseUrl}}/api/matches?date=2026-06-15&country=England
+
+### SCRUM-7: Partidos históricos finalizados de una competición
+GET {{baseUrl}}/api/matches?date=2026-06-10&status=finished&competition=Premier
+
+### ════════════════════════════════════════════════════════════════════════════
+### SPRINT 2 — Filtros avanzados y detalle
+### ════════════════════════════════════════════════════════════════════════════
+
+### SCRUM-16: Partidos EN VIVO ahora mismo (tiempo real)
+GET {{baseUrl}}/api/matches/live
+
+### SCRUM-16: En vivo filtrado por país
+GET {{baseUrl}}/api/matches/live?country=Argentina
+
+### SCRUM-6: Filtrar por estado — scheduled / live / finished / postponed / cancelled
+GET {{baseUrl}}/api/matches/status/live
+
+### SCRUM-6: Finalizados de una fecha específica
+GET {{baseUrl}}/api/matches/status/finished?date=2026-06-20
+
+### SCRUM-8: Partidos de la Liga Profesional Argentina (ID 128) — temporada vigente automática
+GET {{baseUrl}}/api/matches/competition/128
+
+### SCRUM-8: Partidos del Brasileirão (ID 71) — temporada vigente automática
+GET {{baseUrl}}/api/matches/competition/71
+
+### SCRUM-8: Partidos de Premier League (ID 39) de una fecha — temporada vigente automática
+GET {{baseUrl}}/api/matches/competition/39?date=2026-06-20
+
+### SCRUM-8: Fixtures del Mundial 2026 (ID 1)
+GET {{baseUrl}}/api/matches/competition/1
+
+### SCRUM-10 + 11: Detalle completo + eventos de un partido (reemplazá el ID)
+### Los eventos incluyen: goles, tarjetas amarillas/rojas, sustituciones
+GET {{baseUrl}}/api/matches/REEMPLAZAR_CON_ID/detail
+
+### ════════════════════════════════════════════════════════════════════════════
+### SPRINT 3 — Tabla, fixture, equipos
+### ════════════════════════════════════════════════════════════════════════════
+
+### SCRUM-12: Tabla de posiciones — Liga Profesional Argentina (temporada vigente automática)
+GET {{baseUrl}}/api/standings?league=128
+
+### SCRUM-12: Tabla de posiciones — Premier League (temporada vigente automática)
+GET {{baseUrl}}/api/standings?league=39
+
+### SCRUM-12: Tabla — La Liga (temporada vigente automática)
+GET {{baseUrl}}/api/standings?league=140
+
+### SCRUM-12: Tabla — Brasileirão
+GET {{baseUrl}}/api/standings?league=71
+
+### SCRUM-12: Si necesitás forzar una temporada puntual, agregá &season=AÑO
+GET {{baseUrl}}/api/standings?league=39&season=2025
+
+### SCRUM-9: Ligas disponibles de Argentina
+GET {{baseUrl}}/api/competitions?country=Argentina
+
+### SCRUM-9: Ligas disponibles de England
+GET {{baseUrl}}/api/competitions?country=England
+
+### SCRUM-9: Todas las ligas activas
+GET {{baseUrl}}/api/competitions
+
+### SCRUM-13: Fixture completo de la Liga Profesional Argentina (temporada vigente automática)
+GET {{baseUrl}}/api/competitions/128/fixtures
+
+### SCRUM-13: Fixture completo de la Premier League (temporada vigente automática)
+GET {{baseUrl}}/api/competitions/39/fixtures
+
+### SCRUM-13: Fixture completo del Mundial 2026
+GET {{baseUrl}}/api/competitions/1/fixtures
+
+### SCRUM-14: Buscar equipos por nombre
+GET {{baseUrl}}/api/teams/search?name=river
+
+### SCRUM-14: Buscar equipos — Boca
+GET {{baseUrl}}/api/teams/search?name=boca
+
+### SCRUM-14: Buscar equipos — Real Madrid
+GET {{baseUrl}}/api/teams/search?name=real+madrid
+
+### ════════════════════════════════════════════════════════════════════════════
+### ADMINISTRACIÓN
+### ════════════════════════════════════════════════════════════════════════════
+
+### Ver todos los partidos guardados en MongoDB (ya filtrados por competiciones permitidas)
+GET {{baseUrl}}/api/matches/all
+
+### SCRUM-16: Actualizar resultado (reemplazá el ID)
+PUT {{baseUrl}}/api/matches/REEMPLAZAR_CON_ID
+Content-Type: application/json
+
+{
+  "homeScore": 2,
+  "awayScore": 1,
+  "status": "finished",
+  "statusShort": "FT"
+}
+
+### Eliminar partido (reemplazá el ID)
+DELETE {{baseUrl}}/api/matches/REEMPLAZAR_CON_ID

@@ -3,11 +3,11 @@ import mongoose, { Document, Schema } from 'mongoose';
 export type MatchStatus = 'scheduled' | 'live' | 'finished' | 'postponed' | 'cancelled';
 
 export interface IEvent {
-  time: number;         // minuto
+  time: number;         
   team: string;
   player: string;
-  type: string;         // 'Goal' | 'Card' | 'subst'
-  detail: string;       // 'Normal Goal', 'Yellow Card', etc.
+  type: string;        
+  detail: string;       
 }
 
 export interface IMatch extends Document {
@@ -18,7 +18,7 @@ export interface IMatch extends Document {
   awayLogo: string;
   homeScore: number | null;
   awayScore: number | null;
-  homeScoreHT: number | null;   // resultado al entretiempo
+  homeScoreHT: number | null;   
   awayScoreHT: number | null;
   date: Date;
   competition: string;
@@ -27,12 +27,12 @@ export interface IMatch extends Document {
   country: string;
   countryCode: string;
   status: MatchStatus;
-  statusShort: string;          // 'FT', '1H', 'HT', etc.
-  elapsed: number | null;       // minuto actual si está en vivo
+  statusShort: string;          
+  elapsed: number | null;       
   venue: string;
   referee: string;
-  events: IEvent[];             // goles, tarjetas, sustituciones
-  round: string;                // "Regular Season - 15"
+  events: IEvent[];             
+  round: string;                
   createdAt: Date;
   updatedAt: Date;
 }

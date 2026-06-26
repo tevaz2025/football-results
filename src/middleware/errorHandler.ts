@@ -12,7 +12,6 @@ export const errorHandler = (
     return;
   }
 
-  // ID inválido de MongoDB
   if (err instanceof Error && err.name === 'CastError') {
     res.status(400).json({ ok: false, message: 'ID inválido' });
     return;

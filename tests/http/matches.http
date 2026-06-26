@@ -111,23 +111,3 @@ GET {{baseUrl}}/api/teams/search?name=boca
 ### SCRUM-14: Buscar equipos — Real Madrid
 GET {{baseUrl}}/api/teams/search?name=real+madrid
 
-### ════════════════════════════════════════════════════════════════════════════
-### ADMINISTRACIÓN
-### ════════════════════════════════════════════════════════════════════════════
-
-### Ver todos los partidos guardados en MongoDB (ya filtrados por competiciones permitidas)
-GET {{baseUrl}}/api/matches/all
-
-### SCRUM-16: Actualizar resultado (reemplazá el ID)
-PUT {{baseUrl}}/api/matches/REEMPLAZAR_CON_ID
-Content-Type: application/json
-
-{
-  "homeScore": 2,
-  "awayScore": 1,
-  "status": "finished",
-  "statusShort": "FT"
-}
-
-### Eliminar partido (reemplazá el ID)
-DELETE {{baseUrl}}/api/matches/REEMPLAZAR_CON_ID

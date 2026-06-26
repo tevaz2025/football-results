@@ -4,9 +4,6 @@ import { isAllowedLeagueId, ALLOWED_LEAGUES } from '../utils/leagueWhitelist';
 import { getCurrentSeason } from '../utils/season';
 import { asyncHandler } from '../utils/asyncHandler';
 
-// SCRUM-12: tabla de posiciones
-// GET /api/standings?league=39                  → usa automáticamente la temporada vigente
-// GET /api/standings?league=39&season=2025       → fuerza una temporada puntual
 export const getStandings = asyncHandler(async (req: Request, res: Response) => {
   const leagueId = Number(req.query.league);
 

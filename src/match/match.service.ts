@@ -29,13 +29,11 @@ function validateDate(dateStr: string): void {
   if (isNaN(date.getTime()))
     throw AppError.badRequest('Fecha inválida');
 
-  // Límite: no más de 2 meses atrás
   const twoMonthsAgo = new Date();
   twoMonthsAgo.setMonth(twoMonthsAgo.getMonth() - 2);
   if (date < twoMonthsAgo)
     throw AppError.badRequest('Solo se pueden consultar partidos de los últimos 2 meses');
 
-  // Límite: no más de 7 días en el futuro
   const oneWeekAhead = new Date();
   oneWeekAhead.setDate(oneWeekAhead.getDate() + 7);
   if (date > oneWeekAhead)
@@ -56,15 +54,13 @@ async function upsertFixtures(fixtures: Partial<IMatch>[]): Promise<void> {
 
 export const matchService = {
 
-  // SCRUM-5: partidos de hoy
   async getToday(filters?: { status?: string; country?: string; competition?: string }) {
     const date = todayStr();
     const fixtures = await fetchFixturesByDate(date);
     await upsertFixtures(fixtures);
 
     const { start, end } = getDayRange(date);
-    // competitionId siempre filtrado por whitelist, incluso si quedaron
-    // partidos viejos (amistosos, copas no clave) cargados en Mongo de antes.
+
     const query: any = { date: { $gte: start, $lte: end }, competitionId: { $in: ALLOWED_LEAGUE_IDS } };
     if (filters?.status)      query.status      = filters.status;
     if (filters?.country)     query.country     = new RegExp(filters.country, 'i');
@@ -86,7 +82,7 @@ export const matchService = {
     return Match.find(query).select('-__v').sort({ date: 1 }).lean<IMatch[]>();
   },
 
-  // SCRUM-16: partidos EN VIVO ahora mismo
+  
   async getLive(filters?: { country?: string; competition?: string }) {
     const fixtures = await fetchLiveFixtures();
     await upsertFixtures(fixtures);
@@ -112,7 +108,7 @@ export const matchService = {
     return match;
   },
 
-  // SCRUM-6: filtrar partidos por estado
+ 
   async getByStatus(status: string, date?: string) {
     const validStatuses = ['scheduled', 'live', 'finished', 'postponed', 'cancelled'];
     if (!validStatuses.includes(status))
@@ -128,10 +124,6 @@ export const matchService = {
     return Match.find(query).select('-__v').sort({ date: -1 }).lean<IMatch[]>();
   },
 
-  // SCRUM-8: partidos por competición
-  // Antes esto SOLO leía lo que ya estuviera en Mongo (por eso quedaba
-  // "pegado" en datos viejos). Ahora trae el fixture fresco desde la API
-  // con la temporada vigente, lo guarda, y recién ahí responde.
   async getByCompetition(competitionId: number, date?: string, season?: number) {
     if (!isAllowedLeagueId(competitionId)) {
       const nombres = ALLOWED_LEAGUES.map((l) => `${l.name} (id ${l.id})`).join(', ');
@@ -151,7 +143,6 @@ export const matchService = {
     return Match.find(query).select('-__v').sort({ date: -1 }).lean<IMatch[]>();
   },
 
-  // Actualizar estado/resultado manualmente (SCRUM-16)
   async update(id: string, data: Partial<Pick<IMatch, 'homeScore' | 'awayScore' | 'status' | 'statusShort' | 'elapsed'>>) {
     const match = await Match.findByIdAndUpdate(id, { $set: data }, {
       new: true, runValidators: true,

@@ -5,7 +5,7 @@ import { seedAdmin } from './utils/seedAdmin';
 
 const start = async () => {
   await connectDB();
-  await seedAdmin();   // crea el admin si no existe
+  await seedAdmin();  
   app.listen(config.port, () => {
     console.log(` Servidor corriendo en http://localhost:${config.port}`);
   });

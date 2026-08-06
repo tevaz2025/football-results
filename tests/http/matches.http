@@ -1,113 +1,227 @@
- Variables
+### Variables — el token se guarda automáticamente después del login
 @baseUrl = http://localhost:3000
+@token = {{login.response.body.token}}
+@adminToken = {{loginAdmin.response.body.token}}
 
 ### ── Health ──────────────────────────────────────────────────────────────────
 GET {{baseUrl}}/health
 
 ### ════════════════════════════════════════════════════════════════════════════
-### COMPETICIONES PERMITIDAS (whitelist exclusiva — ver src/utils/leagueWhitelist.ts)
-### 39=Premier League · 140=La Liga · 135=Serie A · 78=Bundesliga · 61=Ligue 1
-### 128=Liga Profesional Argentina · 71=Brasileirão Série A · 1=Mundial 2026
-### Cualquier otra liga, copa o amistoso queda filtrado automáticamente.
+### AUTENTICACIÓN
 ### ════════════════════════════════════════════════════════════════════════════
 
+### Registrar usuario
+POST {{baseUrl}}/api/users/register
+Content-Type: application/json
+
+{
+  "username": "juanfutbol",
+  "email": "juan@email.com",
+  "password": "mi_password123"
+}
+
+###
+
+### Login — token guardado en @token
+# @name login
+POST {{baseUrl}}/api/users/login
+Content-Type: application/json
+
+{
+  "email": "juan@email.com",
+  "password": "mi_password123"
+}
+
+###
+
+### Login admin — token guardado en @adminToken
+# @name loginAdmin
+POST {{baseUrl}}/api/users/login
+Content-Type: application/json
+
+{
+  "email": "admin@football.com",
+  "password": "admin1234"
+}
+
+###
+
+### Logout — invalida el token actual
+POST {{baseUrl}}/api/users/logout
+Authorization: Bearer {{token}}
+
+###
+
+### Ver mi perfil
+GET {{baseUrl}}/api/users/me
+Authorization: Bearer {{token}}
+
 ### ════════════════════════════════════════════════════════════════════════════
-### SPRINT 1 — Ver y navegar partidos
+### FAVORITOS — PARTIDOS
 ### ════════════════════════════════════════════════════════════════════════════
 
-### SCRUM-5: Partidos de HOY (datos vienen solos de API-Football, ya filtrados)
+### Primero buscá un ID con GET /api/matches/today, luego pegalo acá
+POST {{baseUrl}}/api/users/favorites/matches/REEMPLAZAR_CON_ID_DE_PARTIDO
+Authorization: Bearer {{token}}
+
+###
+
+DELETE {{baseUrl}}/api/users/favorites/matches/REEMPLAZAR_CON_ID_DE_PARTIDO
+Authorization: Bearer {{token}}
+
+### ════════════════════════════════════════════════════════════════════════════
+### FAVORITOS — EQUIPOS (por ID de API-Football)
+### Paso 1: buscar el equipo para ver su ID
+### Paso 2: agregar con ese ID
+### ════════════════════════════════════════════════════════════════════════════
+
+### Paso 1 — buscar equipo y copiar su "id" del resultado
+GET {{baseUrl}}/api/teams/search?name=river
+
+###
+
+### Paso 2 — agregar con solo el ID (el sistema busca nombre y logo solo)
+POST {{baseUrl}}/api/users/favorites/teams
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "teamId": 435
+}
+
+###
+
+### Otro ejemplo — Manchester United
+POST {{baseUrl}}/api/users/favorites/teams
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "teamId": 33
+}
+
+###
+
+### Quitar equipo favorito por su ID
+DELETE {{baseUrl}}/api/users/favorites/teams/541
+Authorization: Bearer {{token}}
+
+### ════════════════════════════════════════════════════════════════════════════
+### PREDICCIONES
+### ════════════════════════════════════════════════════════════════════════════
+
+### Predecir resultado (partido debe estar en "scheduled")
+POST {{baseUrl}}/api/users/predictions
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "matchId": "REEMPLAZAR_CON_ID_DE_PARTIDO",
+  "homeScore": 2,
+  "awayScore": 1
+}
+
+###
+
+### Ver mis predicciones — muestra resultado real si el partido terminó
+GET {{baseUrl}}/api/users/predictions
+Authorization: Bearer {{token}}
+
+### ════════════════════════════════════════════════════════════════════════════
+### ADMIN
+### ════════════════════════════════════════════════════════════════════════════
+
+### Ver todos los usuarios
+GET {{baseUrl}}/api/users
+Authorization: Bearer {{adminToken}}
+
+###
+
+### Buscar usuario por username
+GET {{baseUrl}}/api/users/find/juanfutbol
+Authorization: Bearer {{adminToken}}
+
+###
+
+### Cambiar rol por username
+PUT {{baseUrl}}/api/users/juanfutbol/role
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "role": "admin"
+}
+
+###
+
+### Volver a viewer
+PUT {{baseUrl}}/api/users/juanfutbol/role
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "role": "viewer"
+}
+
+###
+
+### Desbloquear cuenta bloqueada por intentos fallidos
+PUT {{baseUrl}}/api/users/juanfutbol/unlock
+Authorization: Bearer {{adminToken}}
+
+###
+
+### Eliminar usuario por username
+DELETE {{baseUrl}}/api/users/juanfutbol
+Authorization: Bearer {{adminToken}}
+
+### ════════════════════════════════════════════════════════════════════════════
+### PARTIDOS
+### ════════════════════════════════════════════════════════════════════════════
+
+### Partidos de HOY
 GET {{baseUrl}}/api/matches/today
 
-### SCRUM-5: Partidos de hoy solo de Argentina
-GET {{baseUrl}}/api/matches/today?country=Argentina
+###
 
-### SCRUM-5: Partidos de hoy en vivo
-GET {{baseUrl}}/api/matches/today?status=live
-
-### SCRUM-7: Partidos por fecha (hasta 2 meses atrás) — reemplazá la fecha por una reciente
-GET {{baseUrl}}/api/matches?date=2026-06-20
-
-### SCRUM-7: Partidos históricos con filtro de país
-GET {{baseUrl}}/api/matches?date=2026-06-15&country=England
-
-### SCRUM-7: Partidos históricos finalizados de una competición
-GET {{baseUrl}}/api/matches?date=2026-06-10&status=finished&competition=Premier
-
-### ════════════════════════════════════════════════════════════════════════════
-### SPRINT 2 — Filtros avanzados y detalle
-### ════════════════════════════════════════════════════════════════════════════
-
-### SCRUM-16: Partidos EN VIVO ahora mismo (tiempo real)
+### En vivo ahora mismo
 GET {{baseUrl}}/api/matches/live
 
-### SCRUM-16: En vivo filtrado por país
-GET {{baseUrl}}/api/matches/live?country=Argentina
+###
 
-### SCRUM-6: Filtrar por estado — scheduled / live / finished / postponed / cancelled
-GET {{baseUrl}}/api/matches/status/live
+### Por fecha (ayer, hoy o mañana)
+GET {{baseUrl}}/api/matches?date=2026-08-04
 
-### SCRUM-6: Finalizados de una fecha específica
-GET {{baseUrl}}/api/matches/status/finished?date=2026-06-20
+###
 
-### SCRUM-8: Partidos de la Liga Profesional Argentina (ID 128) — temporada vigente automática
+### Por estado en una fecha
+GET {{baseUrl}}/api/matches/status/finished?date=2026-08-04
+
+###
+
+### Por competición — Liga Profesional Argentina (128)
 GET {{baseUrl}}/api/matches/competition/128
 
-### SCRUM-8: Partidos del Brasileirão (ID 71) — temporada vigente automática
-GET {{baseUrl}}/api/matches/competition/71
+###
 
-### SCRUM-8: Partidos de Premier League (ID 39) de una fecha — temporada vigente automática
-GET {{baseUrl}}/api/matches/competition/39?date=2026-06-20
-
-### SCRUM-8: Fixtures del Mundial 2026 (ID 1)
-GET {{baseUrl}}/api/matches/competition/1
-
-### SCRUM-10 + 11: Detalle completo + eventos de un partido (reemplazá el ID)
-### Los eventos incluyen: goles, tarjetas amarillas/rojas, sustituciones
+### Detalle con goles, tarjetas y sustituciones
 GET {{baseUrl}}/api/matches/REEMPLAZAR_CON_ID/detail
 
 ### ════════════════════════════════════════════════════════════════════════════
-### SPRINT 3 — Tabla, fixture, equipos
+### TABLA / LIGAS / EQUIPOS
 ### ════════════════════════════════════════════════════════════════════════════
 
-### SCRUM-12: Tabla de posiciones — Liga Profesional Argentina (temporada vigente automática)
-GET {{baseUrl}}/api/standings?league=128
+### Tabla de posiciones — Liga Profesional Argentina
+GET {{baseUrl}}/api/standings?league=128&season=2025
 
-### SCRUM-12: Tabla de posiciones — Premier League (temporada vigente automática)
-GET {{baseUrl}}/api/standings?league=39
+###
 
-### SCRUM-12: Tabla — La Liga (temporada vigente automática)
-GET {{baseUrl}}/api/standings?league=140
-
-### SCRUM-12: Tabla — Brasileirão
-GET {{baseUrl}}/api/standings?league=71
-
-### SCRUM-12: Si necesitás forzar una temporada puntual, agregá &season=AÑO
-GET {{baseUrl}}/api/standings?league=39&season=2025
-
-### SCRUM-9: Ligas disponibles de Argentina
+### Ligas disponibles de Argentina
 GET {{baseUrl}}/api/competitions?country=Argentina
 
-### SCRUM-9: Ligas disponibles de England
-GET {{baseUrl}}/api/competitions?country=England
+###
 
-### SCRUM-9: Todas las ligas activas
-GET {{baseUrl}}/api/competitions
-
-### SCRUM-13: Fixture completo de la Liga Profesional Argentina (temporada vigente automática)
-GET {{baseUrl}}/api/competitions/128/fixtures
-
-### SCRUM-13: Fixture completo de la Premier League (temporada vigente automática)
-GET {{baseUrl}}/api/competitions/39/fixtures
-
-### SCRUM-13: Fixture completo del Mundial 2026
-GET {{baseUrl}}/api/competitions/1/fixtures
-
-### SCRUM-14: Buscar equipos por nombre
-GET {{baseUrl}}/api/teams/search?name=river
-
-### SCRUM-14: Buscar equipos — Boca
+### Buscar equipos por nombre
 GET {{baseUrl}}/api/teams/search?name=boca
 
-### SCRUM-14: Buscar equipos — Real Madrid
-GET {{baseUrl}}/api/teams/search?name=real+madrid
 

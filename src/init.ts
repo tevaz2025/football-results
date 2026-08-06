@@ -5,7 +5,7 @@ import { seedAdmin } from './utils/seedAdmin';
 
 const start = async () => {
   await connectDB();
-  await seedAdmin();  
+  await seedAdmin();   
   app.listen(config.port, () => {
     console.log(` Servidor corriendo en http://localhost:${config.port}`);
   });

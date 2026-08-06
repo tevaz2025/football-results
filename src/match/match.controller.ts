@@ -38,13 +38,12 @@ export const getMatchesByStatus = asyncHandler(async (req, res) => {
 
 export const getMatchesByCompetition = asyncHandler(async (req, res) => {
   const competitionId = Number(req.params.competitionId);
-  const { date, season } = req.query as Record<string, string>;
+  const { date } = req.query as Record<string, string>;
   if (isNaN(competitionId)) {
     res.status(400).json({ ok: false, message: 'competitionId debe ser un número' });
     return;
   }
-  const seasonNum = season ? Number(season) : undefined;
-  const matches = await matchService.getByCompetition(competitionId, date, seasonNum);
+  const matches = await matchService.getByCompetition(competitionId, date);
   res.json({ ok: true, competitionId, count: matches.length, data: matches });
 });
 

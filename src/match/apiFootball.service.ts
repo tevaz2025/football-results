@@ -114,27 +114,24 @@ function handleApiError(err: any): never {
   throw AppError.internal(`Error al consultar API-Football: ${err.message}`);
 }
 
-// Partidos por fecha (SCRUM-5, 7, históricos)
 export async function fetchFixturesByDate(date: string): Promise<Partial<IMatch>[]> {
   try {
     const { data } = await api.get('/fixtures', { params: { date } });
     return (data.response as ApiFixture[])
-      .filter((f) => isAllowedLeague(f.league.id, f.league.country))   // ← solo ligas permitidas
+      .filter((f) => isAllowedLeague(f.league.id, f.league.country))   
       .map(normalizeFixture);
   } catch (err) { handleApiError(err); }
 }
 
-// Partidos EN VIVO ahora mismo (SCRUM-16)
 export async function fetchLiveFixtures(): Promise<Partial<IMatch>[]> {
   try {
     const { data } = await api.get('/fixtures', { params: { live: 'all' } });
     return (data.response as ApiFixture[])
-      .filter((f) => isAllowedLeague(f.league.id, f.league.country))   // ← solo ligas permitidas
+      .filter((f) => isAllowedLeague(f.league.id, f.league.country))   
       .map(normalizeFixture);
   } catch (err) { handleApiError(err); }
 }
 
-// Detalle completo de un fixture con eventos (SCRUM-10, 11)
 export async function fetchFixtureDetail(fixtureId: number): Promise<Partial<IMatch> | null> {
   try {
     const { data } = await api.get('/fixtures', {
@@ -161,18 +158,16 @@ export async function fetchStandings(leagueId: number, season: number) {
   } catch (err) { handleApiError(err); }
 }
 
-// Fixture completo de una competición (SCRUM-13)
 export async function fetchLeagueFixtures(leagueId: number, season: number): Promise<Partial<IMatch>[]> {
-  rejectIfNotAllowed(leagueId);  // ← solo ligas permitidas
+  rejectIfNotAllowed(leagueId);  
   try {
     const { data } = await api.get('/fixtures', { params: { league: leagueId, season } });
     return (data.response as ApiFixture[])
-      .filter((f) => isAllowedLeague(f.league.id, f.league.country))  // doble chequeo por ID+país
+      .filter((f) => isAllowedLeague(f.league.id, f.league.country)) 
       .map(normalizeFixture);
   } catch (err) { handleApiError(err); }
 }
 
-// Buscar equipos por nombre (SCRUM-14)
 export async function searchTeams(name: string) {
   try {
     const { data } = await api.get('/teams', { params: { search: name } });
@@ -188,14 +183,13 @@ export async function searchTeams(name: string) {
   } catch (err) { handleApiError(err); }
 }
 
-// Ligas disponibles, opcionalmente por país (SCRUM-9)
 export async function fetchLeagues(country?: string) {
   try {
     const params: Record<string, any> = { type: 'league', current: true };
     if (country) params.country = country;
     const { data } = await api.get('/leagues', { params });
     return data.response
-      .filter((r: any) => isAllowedLeague(r.league.id, r.country.name))  // ← solo ligas permitidas
+      .filter((r: any) => isAllowedLeague(r.league.id, r.country.name)) 
       .map((r: any) => ({
         id:      r.league.id,
         name:    r.league.name,
@@ -206,3 +200,21 @@ export async function fetchLeagues(country?: string) {
       }));
   } catch (err) { handleApiError(err); }
 }
+
+export async function fetchTeamById(teamId: number) {
+  try {
+    const { data } = await api.get('/teams', { params: { id: teamId } });
+    if (!data.response?.length) return null;
+    const t = data.response[0];
+    return {
+      id:      t.team.id,
+      name:    t.team.name,
+      logo:    t.team.logo,
+      country: t.team.country,
+      founded: t.team.founded,
+      venue:   t.venue?.name ?? '',
+      city:    t.venue?.city ?? '',
+    };
+  } catch (err) { handleApiError(err); }
+}
+
